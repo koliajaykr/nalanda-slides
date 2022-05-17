@@ -1,0 +1,474 @@
+---
+format: 
+  revealjs:
+    logo: "image/logo.png"
+    slide-number: c
+---
+
+#  {background-image="image/logo.png" background-size="50%"}
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(echo = F,
+                      fig.align = "center",
+                      fig.retina = 3,
+                      warning = F,
+                      message = F)
+```
+
+```{r packages}
+library(tidyverse)
+library(gghighlight)
+```
+
+## Nalanda Academy {style="color: green"}
+
+::: callout-note
+## Note
+
+These slides are work in progress.
+:::
+
+## Nalanda Academy
+
+::: panel-tabset
+## Nalanda Academy
+
+This is the parent organisation.
+
+## Digital Nalanda
+
+This is an on-line platform of Nalanda Academy.
+:::
+
+# Student Mapping
+
+```{r import-data}
+
+student_raw <- read_csv("data/student_raw.csv")
+
+#glimpse(student_raw)
+
+# remove columns
+student <- student_raw |>
+  select(-c(Timestamp, name, aadhaar,
+            mobile, email, address,
+            "upload 10th class certificate/mark-sheet"))
+
+student <- student |> 
+  mutate(across(where(is.character),as_factor))
+
+#str(student)
+```
+
+## Number of Students
+
+```{r student-numbers}
+student |> 
+  mutate(year = as_factor(year)) |> 
+  group_by(year) |> 
+  summarise(n = n()) |>
+  drop_na() |> 
+  ggplot(aes(year, n)) +
+  geom_col(fill = "gray90") +
+  geom_line()+                            # line plot
+  geom_line(size = 1.5, color="blue", group = 1) +
+  theme_minimal(base_size = 12) +
+  labs(
+    x = "Year",
+    y = "Count"
+  ) +
+geom_text(aes(label = n),
+          vjust = -0.5,
+          fontface = "bold",
+          color = "black")  
+```
+
+```{r student-type-plot}
+#| eval: false
+
+#Student Type
+student |> 
+  drop_na(student_type) |> 
+  mutate(student_type = fct_infreq(student_type)) |> 
+  group_by(student_type) |> 
+  summarise(n = n()) |> 
+  mutate(perc = n/sum(n)*100) |> 
+  ggplot(aes(x = n,
+             y = fct_rev(student_type),
+             fill = student_type)) +
+  geom_col(width = 0.5) +
+  gghighlight(max(n),
+              max_highlight = 2L) +
+  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
+            hjust = 1.1,
+            fontface = "bold",
+            color = "black"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Count",
+    y = "Type",
+    caption = "The total number of student is 877"
+  )
+```
+
+## Age
+
+```{r age-plot}
+student |> 
+  drop_na(age) |> 
+  mutate(age = fct_infreq(age)) |> 
+  group_by(age) |> 
+  summarise(n = n()) |> 
+  mutate(perc = n/sum(n)*100) |> 
+  ggplot(aes(x = n,
+             y = fct_rev(age),
+             fill = age)) +
+  geom_col(width = 0.5) +
+  gghighlight(max(n),
+              max_highlight = 2L) +
+  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
+            hjust = 1.1,
+            fontface = "bold",
+            color = "black"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Count",
+    y = "Age Group",
+    caption = "The total number of student is 877"
+  ) 
+```
+
+## Gender
+
+```{r gender-plot}
+
+student |> 
+  drop_na(gender) |> 
+  mutate(gender = fct_infreq(gender)) |> 
+  group_by(gender) |> 
+  summarise(n = n()) |> 
+  mutate(perc = n/sum(n)*100) |> 
+  ggplot(aes(x = n,
+             y = fct_rev(gender),
+             fill = gender)) +
+  geom_col(width = 0.5) +
+  gghighlight(max(n),
+              max_highlight = 2L) +
+  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
+            hjust = 1.1,
+            fontface = "bold",
+            color = "black"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Count",
+    y = "Gender",
+    caption = "The total number of student is 877"
+  )
+```
+
+## Caste
+
+```{r caste-plot}
+
+student |> 
+  drop_na(category) |> 
+  mutate(category = fct_infreq(category)) |> 
+  group_by(category) |> 
+  summarise(n = n()) |> 
+  mutate(perc = n/sum(n)*100) |> 
+  ggplot(aes(x = n,
+             y = fct_rev(category),
+             fill = category)) +
+  geom_col() +
+  gghighlight(max(n),
+              max_highlight = 2L) +
+  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
+            hjust = 1.1,
+            fontface = "bold",
+            color = "black"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Count",
+    y = "Caste Category",
+    caption = "The total number of student is 877"
+  ) 
+```
+
+## Religion
+
+```{r religion-plot}
+
+student |> 
+  drop_na(religion) |> 
+  mutate(religion = fct_infreq(religion)) |> 
+  group_by(religion) |> 
+  summarise(n = n()) |> 
+  mutate(perc = n/sum(n)*100) |> 
+  ggplot(aes(x = n,
+             y = fct_rev(religion),
+             fill = religion)) +
+  geom_col(width = 0.5) +
+  gghighlight(max(n),
+              max_highlight = 2L) +
+  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
+            hjust = 1.1,
+            fontface = "bold",
+            color = "black"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Count",
+    y = "Religion Group",
+    caption = "The total number of student is 877"
+  )
+```
+
+## Medium of School Education
+
+```{r edu-medium-plot}
+student |> 
+  drop_na(edu_medium) |> 
+  mutate(edu_medium = fct_infreq(edu_medium)) |> 
+  group_by(edu_medium) |> 
+  summarise(n = n()) |> 
+  mutate(perc = n/sum(n)*100) |> 
+  ggplot(aes(x = n,
+             y = fct_rev(edu_medium),
+             fill = edu_medium)) +
+  geom_col(width = 0.5) +
+  gghighlight(max(n),
+              max_highlight = 3L) +
+  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
+            hjust = 1.1,
+            fontface = "bold",
+            color = "black"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Count",
+    y = "School Medium",
+    caption = "The total number of student is 877"
+  )
+```
+
+## Discipline of Education
+
+```{r stream-plot}
+student |> 
+  drop_na(stream) |> 
+  mutate(stream = fct_infreq(stream)) |> 
+  group_by(stream) |> 
+  summarise(n = n()) |> 
+  mutate(perc = n/sum(n)*100) |> 
+  ggplot(aes(x = n,
+             y = fct_rev(stream),
+             fill = stream)) +
+  geom_col(width = 0.5) +
+  gghighlight(max(n),
+              max_highlight = 2L) +
+  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
+            hjust = 1.1,
+            fontface = "bold",
+            color = "black"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Count",
+    y = "Discipline of Education",
+    caption = "The total number of student is 877"
+  )
+```
+
+## Education
+
+```{r education-plot}
+student |> 
+  drop_na(education) |> 
+  mutate(education = fct_infreq(education)) |> 
+  group_by(education) |> 
+  summarise(n = n()) |> 
+  mutate(perc = n/sum(n)*100) |> 
+  ggplot(aes(x = n,
+             y = fct_rev(education),
+             fill = education)) +
+  geom_col(width = 0.5) +
+  gghighlight(max(n),
+              max_highlight = 2L) +
+  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
+            hjust = 1.1,
+            fontface = "bold",
+            color = "black"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Count",
+    y = "Level of Education",
+    caption = "The total number of student is 877"
+  )
+```
+
+## Place
+
+```{r state-plot}
+student |> 
+  drop_na(state) |> 
+  mutate(state= fct_infreq(fct_lump_n(state, n=3))) |> 
+  group_by(state) |> 
+  summarise(n = n()) |> 
+  mutate(perc = n/sum(n)*100) |> 
+  ggplot(aes(x = n,
+             y = fct_rev(state),
+             fill = state)) +
+  geom_col(width = 0.5) +
+  gghighlight(max(n),
+              max_highlight = 2L) +
+  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
+            hjust = 1.1,
+            fontface = "bold",
+            color = "black"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Count",
+    y = "State of India",
+    caption = "The total number of student is 877"
+  )
+```
+
+## Fathers' Education
+
+```{r father-edu-plot}
+student |> 
+  drop_na(father_edu) |> 
+  mutate(father_edu = fct_infreq(father_edu)) |> 
+  group_by(father_edu) |> 
+  summarise(n = n()) |> 
+  mutate(perc = n/sum(n)*100) |> 
+  ggplot(aes(x = n,
+             y = fct_rev(father_edu),
+             fill = father_edu)) +
+  geom_col(width = 0.5) +
+  gghighlight(max(n),
+              max_highlight = 3L) +
+  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
+            hjust = 1.1,
+            fontface = "bold",
+            color = "black"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Count",
+    y = "Level of Education",
+    caption = "The total number of student is 877"
+  )
+```
+
+## Mothers' Education
+
+```{r mother-edu-plot}
+student |> 
+  drop_na(mother_edu) |> 
+  mutate(mother_edu = fct_infreq(mother_edu)) |> 
+  group_by(mother_edu) |> 
+  summarise(n = n()) |> 
+  mutate(perc = n/sum(n)*100) |> 
+  ggplot(aes(x = n,
+             y = fct_rev(mother_edu),
+             fill = mother_edu)) +
+  geom_col(width = 0.5) +
+  gghighlight(max(n),
+              max_highlight = 2L) +
+  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
+            hjust = 1.1,
+            fontface = "bold",
+            color = "black"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Count",
+    y = "Level of Education",
+    caption = "The total number of student is 877"
+  )
+```
+
+## Annual Family Income
+
+```{r income-plot}
+student |> 
+  drop_na(income) |> 
+  mutate(income = fct_infreq(income)) |> 
+  group_by(income) |> 
+  summarise(n = n()) |> 
+  mutate(perc = n/sum(n)*100) |> 
+  ggplot(aes(x = n,
+             y = fct_rev(income),
+             fill = income)) +
+  geom_col(width = 0.5) +
+  scale_y_discrete(labels = function(y) 
+    stringr::str_wrap(y, width = 15)) +
+  gghighlight(max(n),
+              max_highlight = 1L) +
+  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
+            hjust = 1.1,
+            fontface = "bold",
+            color = "black"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Count",
+    y = "Group of Income",
+    caption = "The total number of student is 877"
+  )
+```
+
+## Nalanda Academy Team
+
+::: panel-tabset
+## Director
+
+Anoop Kumar
+
+## Co-Founders
+
+Sapna
+
+Kapil
+
+## Heads
+
+-   Manisha
+
+-   Deepak
+
+-   Minakshi
+
+-   Nilesh
+
+-   Ajay
+
+## Educators
+
+-   Sachin
+
+-   Rahul
+
+-   Pranali
+:::
+
+## Nalanda Abhiyan Campus
