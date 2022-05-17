@@ -172,10 +172,8 @@ student |>
   )
 ```
 
-## Caste
-
 ```{r caste-plot}
-
+#| eval: false
 student |> 
   drop_na(category) |> 
   mutate(category = fct_infreq(category)) |> 
@@ -202,10 +200,8 @@ student |>
   ) 
 ```
 
-## Religion
-
 ```{r religion-plot}
-
+#| eval: false
 student |> 
   drop_na(religion) |> 
   mutate(religion = fct_infreq(religion)) |> 
