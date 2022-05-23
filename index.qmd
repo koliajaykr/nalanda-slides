@@ -20,7 +20,7 @@ library(tidyverse)
 library(gghighlight)
 library(gganimate)
 library(packcircles)
-#library(viridis)
+library(viridis)
 ```
 
 ## Nalanda Academy {style="color: green"}
