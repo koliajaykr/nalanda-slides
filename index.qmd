@@ -119,7 +119,7 @@ student |>
   )
 ```
 
-## Age
+## Age Old
 
 ```{r age-plot-old}
 #| eval: false
