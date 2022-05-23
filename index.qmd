@@ -119,7 +119,7 @@ student |>
   )
 ```
 
-## Age Old
+## Age Old plot
 
 ```{r age-plot-old}
 #| eval: false
@@ -167,7 +167,7 @@ ggplot() +
   geom_polygon(data = dat.gg, aes(x, y, group = id, fill=id), colour = "black", alpha = 0.9) +
   scale_fill_viridis()+
   scale_fill_distiller(palette = "Blues") +
-  geom_text(data = data, aes(x, y, size=perc, label =sprintf("%s (%s%%) \n %s", n, round(perc,0),fct_rev(age)) ), color="black") +
+  geom_text(data = data, size=c(5,5,4,1.5),aes(x, y, label =sprintf("%s (%s%%) \n %s", n, round(perc,0),fct_rev(age)) ), color="black") +
   theme_minimal(base_size = 0) +
   theme(legend.position="none")+ 
   labs(
