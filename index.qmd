@@ -188,7 +188,7 @@ ggplot() +
 
 ```
 
-## Gender
+## Gender old
 
 ```{r gender-plot old}
 #| eval: false
@@ -217,7 +217,7 @@ student |>
     caption = "The total number of student is 877"
   )
 ```
-
+## Gender 
 ```{r gender-plot}
 
 
@@ -651,7 +651,7 @@ ggplot(data, aes(x=as.factor(id), y=perc,fill=mother_edu)) +       # Note that i
 
 ```
 
-## Annual Family Income
+## Annual Family Income 
 
 ```{r income-plot}
 data<- student |> 
@@ -700,6 +700,9 @@ ggplot(data, aes(x=as.factor(id), y=perc,fill=income)) +       # Note that id is
     y = "",
     caption = "The total number of student is 877"
   )
+
+
+
 
 
 ```
