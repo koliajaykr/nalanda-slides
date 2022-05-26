@@ -18,6 +18,9 @@ knitr::opts_chunk$set(echo = F,
 ```{r packages}
 library(tidyverse)
 library(gghighlight)
+library(gganimate)
+library(packcircles)
+library(viridis)
 ```
 
 ## Nalanda Academy {style="color: green"}
@@ -69,18 +72,21 @@ student |>
   summarise(n = n()) |>
   drop_na() |> 
   ggplot(aes(year, n)) +
-  geom_col(fill = "gray90") +
+  geom_col(fill = "#e5f6ff") +
   geom_line()+                            # line plot
-  geom_line(size = 1.5, color="blue", group = 1) +
+  geom_line(size = 1, color="#1192e8", group = 1) +
+  geom_point(shape=21, color="#1192e8", fill="#002d9c", size=4) +
   theme_minimal(base_size = 12) +
+ 
   labs(
     x = "Year",
-    y = "Count"
+    y = "Number of Students"
   ) +
 geom_text(aes(label = n),
-          vjust = -0.5,
+          vjust = 0.9,hjust=-0.5,
           fontface = "bold",
           color = "black")  
+
 ```
 
 ```{r student-type-plot}
@@ -113,9 +119,10 @@ student |>
   )
 ```
 
-## Age
+## Age Old plot
 
-```{r age-plot}
+```{r age-plot-old}
+#| eval: false
 student |> 
   drop_na(age) |> 
   mutate(age = fct_infreq(age)) |> 
@@ -140,6 +147,38 @@ student |>
     y = "Age Group",
     caption = "The total number of student is 877"
   ) 
+```
+
+```{r age-plot}
+# Generate the layout
+data<-student |> 
+  drop_na(age) |> 
+  mutate(age = fct_infreq(age)) |> 
+  group_by(age) |> 
+  summarise(n = n()) |> 
+  mutate(perc = n/sum(n)*100)
+packing <- circleProgressiveLayout(data$perc, sizetype='area')
+packing$radius <- 0.95*packing$radius
+data <- cbind(data, packing)
+dat.gg <- circleLayoutVertices(packing, npoints=50)
+
+# Plot 
+ggplot() + 
+  geom_polygon(data = dat.gg, aes(x, y, group = id, fill=id), colour = "black", alpha = 0.9) +
+  scale_fill_viridis()+
+  scale_fill_distiller(palette = "Blues") +
+  geom_text(data = data, size=c(5,5,4,1.5),aes(x, y, label =sprintf("%s (%s%%) \n %s", n, round(perc,0),fct_rev(age)) ), color="black") +
+  theme_minimal(base_size = 0) +
+  theme(legend.position="none")+ 
+  labs(
+    x = "Count",
+    y = "Age Group",
+    caption = "The total number of student is 877"
+  ) +
+  coord_equal()
+  
+  
+
 ```
 
 ## Gender
