@@ -1,8 +1,14 @@
 ---
+title: ""
 format: 
   revealjs:
+    incremental: true
     logo: "image/logo.png"
-    slide-number: c
+    footer: "<https://nalanda-academy.org/>"
+    slide-number: c/t
+    title-slide-attributes: 
+      data-background-image: "image/logo.png"
+      data-background-size: "cover"
 ---
 
 #  {background-image="image/logo.png" background-size="50%"}
@@ -20,12 +26,117 @@ library(tidyverse)
 library(gghighlight)
 ```
 
-## Nalanda Academy {style="color: green"}
+## Nalanda Academy
 
-::: callout-note
-## Note
+Nalanda Academy is an educational institute that trains Bahujan students from rural and poor backgrounds to pursue education in top Indian and foreign university. It works on the Dr. Babasaheb Ambedkar's philosophy to empower our next generation through quality higher education.
 
-These slides are work in progress.
+## Nalanda Academy Team
+
+::: panel-tabset
+## Director
+
+::: columns
+::: {.column width="25%"}
+***Anoop Kumar***
+
+```{r}
+#| fig.align: left
+#| out.width: "100%" 
+  
+knitr::include_graphics("https://nalanda-academy.org/wp-content/uploads/2016/08/WhatsApp-Image-2021-11-11-at-8.05.32-PM-1-e1638453391836-630x577.jpeg")
+```
+:::
+
+::: {.column width="75%"}
+"I have always tried to build a team around Nalanda since the day I started. Really don't know if all these efforts will sustain in the long run or not. Only one thing I am sure of is that we are making an honest effort in building a community institution with our own sweat and blood and without making any demands whatsoever. Even in its failure, I will remain a very proud man".
+:::
+:::
+
+## Co-Founders
+
+::: columns
+::: {.column width="50%"}
+::: panel-tabset
+Sapna Jambhulkar
+
+```{r}
+#| out-width: "50%"
+#| fig-align: "left"
+knitr::include_graphics("https://nalanda-academy.org/wp-content/uploads/2016/08/Sapna-scaled-e1638456905919-340x310.jpg?1f2fde&1f2fde")
+```
+:::
+:::
+
+::: {.column width="50%"}
+::: panel-tabset
+Kapil Wankhede
+
+```{r}
+#| out-width: "50%"
+#| fig-align: "left"
+knitr::include_graphics("https://nalanda-academy.org/wp-content/uploads/2016/08/IMG_7750-scaled-e1638456573937-340x310.jpg?1f2fde&1f2fde")
+```
+:::
+:::
+:::
+
+## Heads
+
+::: columns
+::: {.column width="50%"}
+-   **Minakshi Jiwane:** *Head, Administration*
+
+-   **Dipak Naranje:** *Head, Accounts*
+
+-   **Manisha Dakhne:** *Librarian*
+
+-   **Nilesh Kumar:** *Head, Documentation*
+:::
+
+::: {.column width="50%"}
+-   **Dr. Ravikant Kisana**: *Head, Research*
+
+-   **Pranali Kamble:** *Head, Communication*
+
+-   **Dr. Ajay Kumar Koli:** *Head, Data Science*
+:::
+:::
+
+## Educators
+
+::: columns
+::: {.column width="50%"}
+-   **Sachin Ranvir**
+
+-   **Durga Hole**
+
+-   **Jayesh Shende**
+
+-   **Rahul Panwar**
+
+-   **Ajay Khairkar**
+
+-   **Pradnya Pawaskar**
+
+-   **Uddhav Shinde**
+:::
+
+::: {.column width="50%"}
+-   **Anup Chele**
+
+-   **Shilpa Mendhe**
+
+-   **Kundan Kamble**
+
+-   **Vishal Jadhao**
+
+-   **Rahul Patil**
+
+-   **Shyanky Sakhare**
+
+-   **Dhiraj Kamble**
+:::
+:::
 :::
 
 ## Nalanda Academy
@@ -402,7 +513,7 @@ student |>
   )
 ```
 
-## Annual Family Income
+## Annual Family Income {background="#000000"}
 
 ```{r income-plot}
 student |> 
@@ -433,38 +544,6 @@ student |>
   )
 ```
 
-## Nalanda Academy Team
-
-::: panel-tabset
-## Director
-
-Anoop Kumar
-
-## Co-Founders
-
-Sapna
-
-Kapil
-
-## Heads
-
--   Manisha
-
--   Deepak
-
--   Minakshi
-
--   Nilesh
-
--   Ajay
-
-## Educators
-
--   Sachin
-
--   Rahul
-
--   Pranali
-:::
-
 ## Nalanda Abhiyan Campus
+
+## Appreciation

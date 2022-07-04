@@ -6,13 +6,23 @@
 
 # how to deal with missing values while importing the data
 
-library(palmerpenguins)
-library(ggplot2)
-library(dplyr)
+library(tidyverse)
+library(gganimate)
+library(gifski)
+library(av)
 
+student_raw <- read_csv("data/student_raw.csv")
 
-ggplot(penguins,
-       aes(year)) +
-  geom_bar()
+#glimpse(student_raw)
 
+# remove columns
+student <- student_raw |>
+  select(-c(Timestamp, aadhaar,
+            mobile, email, address,
+            "upload 10th class certificate/mark-sheet"))
+
+student <- student |> 
+  mutate(across(where(is.character),as_factor))
+
+summary(student$name)
 
