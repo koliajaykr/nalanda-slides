@@ -24,6 +24,16 @@ knitr::opts_chunk$set(echo = F,
 ```{r packages}
 library(tidyverse)
 library(gghighlight)
+library(gganimate)
+library(packcircles)
+library(viridis)
+library(ggtext)
+library(rvest)
+# install.packages("devtools")
+# devtools::install_github("hadley/emo")
+library(emo)
+
+
 ```
 
 ## Nalanda Academy
@@ -180,18 +190,21 @@ student |>
   summarise(n = n()) |>
   drop_na() |> 
   ggplot(aes(year, n)) +
-  geom_col(fill = "gray90") +
+  geom_col(fill = "#e5f6ff") +
   geom_line()+                            # line plot
-  geom_line(size = 1.5, color="blue", group = 1) +
+  geom_line(size = 1, color="#1192e8", group = 1) +
+  geom_point(shape=21, color="#1192e8", fill="#002d9c", size=4) +
   theme_minimal(base_size = 12) +
+ 
   labs(
     x = "Year",
-    y = "Count"
+    y = "Number of Students"
   ) +
 geom_text(aes(label = n),
-          vjust = -0.5,
+          vjust = 0.9,hjust=-0.5,
           fontface = "bold",
           color = "black")  
+
 ```
 
 ```{r student-type-plot}
@@ -224,9 +237,10 @@ student |>
   )
 ```
 
-## Age
+## Age Old plot
 
-```{r age-plot}
+```{r age-plot-old}
+#| eval: false
 student |> 
   drop_na(age) |> 
   mutate(age = fct_infreq(age)) |> 
@@ -253,10 +267,42 @@ student |>
   ) 
 ```
 
-## Gender
+```{r age-plot}
+# Generate the layout
+data<-student |> 
+  drop_na(age) |> 
+  mutate(age = fct_infreq(age)) |> 
+  group_by(age) |> 
+  summarise(n = n()) |> 
+  mutate(perc = n/sum(n)*100)
+packing <- circleProgressiveLayout(data$perc, sizetype='area')
+packing$radius <- 0.95*packing$radius
+data <- cbind(data, packing)
+dat.gg <- circleLayoutVertices(packing, npoints=50)
 
-```{r gender-plot}
+# Plot 
+ggplot() + 
+  geom_polygon(data = dat.gg, aes(x, y, group = id, fill=id), colour = "black", alpha = 0.9) +
+  scale_fill_viridis()+
+  scale_fill_distiller(palette = "Blues") +
+  geom_text(data = data, size=c(5,5,4,1.5),aes(x, y, label =sprintf("%s (%s%%) \n %s", n, round(perc,0),fct_rev(age)) ), color="black") +
+  theme_void() +
+  theme(legend.position="none")+ 
+  labs(
+    x = "Count",
+    y = "Age Group",
+    caption = "The total number of student is 877"
+  ) +
+  coord_equal()
+  
+  
 
+```
+
+## Gender old
+
+```{r gender-plot old}
+#| eval: false
 student |> 
   drop_na(gender) |> 
   mutate(gender = fct_infreq(gender)) |> 
@@ -281,6 +327,61 @@ student |>
     y = "Gender",
     caption = "The total number of student is 877"
   )
+```
+## Gender 
+```{r gender-plot}
+
+
+
+
+data <- student |> 
+  drop_na(gender) |> 
+  mutate(gender = fct_infreq(gender)) |> 
+  group_by(gender) |> 
+  summarise(n = n()) |> 
+  mutate(perc = n/sum(n)*100)
+data['emoji']<-c(emo::ji("man"),emo::ji("woman"))
+
+emoji_to_link <- function(x) {
+  paste0("https://emojipedia.org/emoji/",x) %>%
+    read_html() %>%
+    html_nodes("tr td a") %>%
+    .[1] %>%
+    html_attr("href") %>%
+    paste0("https://emojipedia.org/", .) %>%
+    read_html() %>%
+    html_node('div[class="vendor-image"] img') %>%
+    html_attr("src")
+}
+link_to_img <- function(x, size = perc) {
+  paste0("<img src='", x, "' width='", size, "'/>")
+}
+
+data <- data %>%
+  mutate(url = map_chr(emoji, slowly(~emoji_to_link(.x), rate_delay(1))),
+         label = link_to_img(url,round(perc,0)))
+
+data['id']<-c("","")
+
+
+data %>%
+  ggplot(aes(gender, id, label = label)) +
+  geom_richtext(aes(y = id), fill = NA, label.color = NA, # remove background and outline
+                label.padding = grid::unit(rep(0, 4), "pt") # remove padding
+  ) +
+  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
+          vjust = 5.1,
+            fontface = "bold",
+            color = "black"
+  )+
+  theme_void() +
+  theme(legend.position = "none") +
+  labs(
+    x = "",
+    y = "",
+    caption = "The total number of student is 877"
+  )
+
 ```
 
 ```{r caste-plot}
@@ -342,206 +443,383 @@ student |>
 ## Medium of School Education
 
 ```{r edu-medium-plot}
-student |> 
+data<- student |> 
   drop_na(edu_medium) |> 
   mutate(edu_medium = fct_infreq(edu_medium)) |> 
   group_by(edu_medium) |> 
   summarise(n = n()) |> 
-  mutate(perc = n/sum(n)*100) |> 
-  ggplot(aes(x = n,
-             y = fct_rev(edu_medium),
-             fill = edu_medium)) +
-  geom_col(width = 0.5) +
-  gghighlight(max(n),
-              max_highlight = 3L) +
-  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
-            hjust = 1.1,
+  mutate(perc = n/sum(n)*100)
+data['emoji']<-c(emo::ji("school"),emo::ji("school"))
+
+emoji_to_link <- function(x) {
+  paste0("https://emojipedia.org/emoji/",x) %>%
+    read_html() %>%
+    html_nodes("tr td a") %>%
+    .[1] %>%
+    html_attr("href") %>%
+    paste0("https://emojipedia.org/", .) %>%
+    read_html() %>%
+    html_node('div[class="vendor-image"] img') %>%
+    html_attr("src")
+}
+link_to_img <- function(x, size = perc) {
+  paste0("<img src='", x, "' width='", size, "'/>")
+}
+
+data <- data %>%
+  mutate(url = map_chr(emoji, slowly(~emoji_to_link(.x), rate_delay(1))),
+         label = link_to_img(url,round(perc,0)))
+
+data['id']<-c("","")
+
+data %>%
+  ggplot(aes(edu_medium, id, label = label)) +
+  geom_richtext(aes(y = id), fill = NA, label.color = NA, # remove background and outline
+                label.padding = grid::unit(rep(0, 4), "pt") # remove padding
+  ) +
+  
+  geom_text(aes(label = sprintf("%s", edu_medium)),
+          vjust = 5.1,
             fontface = "bold",
             color = "black"
-  ) +
-  theme_minimal(base_size = 12) +
+  )+
+  
+  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
+          vjust = 8.1,
+            fontface = "bold",
+            color = "black"
+  )+
+  theme_void() +
   theme(legend.position = "none") +
   labs(
-    x = "Count",
-    y = "School Medium",
+    x = "",
+    y = "",
     caption = "The total number of student is 877"
   )
+
+
+
 ```
 
 ## Discipline of Education
 
 ```{r stream-plot}
-student |> 
+data<-student |> 
   drop_na(stream) |> 
   mutate(stream = fct_infreq(stream)) |> 
   group_by(stream) |> 
   summarise(n = n()) |> 
-  mutate(perc = n/sum(n)*100) |> 
-  ggplot(aes(x = n,
-             y = fct_rev(stream),
-             fill = stream)) +
-  geom_col(width = 0.5) +
-  gghighlight(max(n),
-              max_highlight = 2L) +
-  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
-            hjust = 1.1,
+  mutate(perc = n/sum(n)*100)
+data['emoji']<-c(emo::ji("science"),emo::ji("book"),emo::ji("money"))
+data['perc_emoji']<-c(50,40,35)
+
+emoji_to_link <- function(x) {
+  paste0("https://emojipedia.org/emoji/",x) %>%
+    read_html() %>%
+    html_nodes("tr td a") %>%
+    .[1] %>%
+    html_attr("href") %>%
+    paste0("https://emojipedia.org/", .) %>%
+    read_html() %>%
+    html_node('div[class="vendor-image"] img') %>%
+    html_attr("src")
+}
+link_to_img <- function(x, size = perc) {
+  paste0("<img src='", x, "' width='", size, "'/>")
+}
+
+data <- data %>%
+  mutate(url = map_chr(emoji, slowly(~emoji_to_link(.x), rate_delay(1))),
+         label = link_to_img(url,round(perc_emoji,0)))
+
+data['id']<-c("","","")
+
+data %>%
+  ggplot(aes(stream, id, label = label)) +
+  geom_richtext(aes(y = id), fill = NA, label.color = NA, # remove background and outline
+                label.padding = grid::unit(rep(0, 4), "pt") # remove padding
+  ) +
+  
+  geom_text(aes(label = sprintf("%s", stream)),
+          vjust = 5.1,
             fontface = "bold",
             color = "black"
-  ) +
-  theme_minimal(base_size = 12) +
+  )+
+  
+  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
+          vjust = 8.1,
+            fontface = "bold",
+            color = "black"
+  )+
+  theme_void() +
   theme(legend.position = "none") +
   labs(
-    x = "Count",
-    y = "Discipline of Education",
+    x = "",
+    y = "",
     caption = "The total number of student is 877"
   )
+
+
 ```
 
 ## Education
 
 ```{r education-plot}
-student |> 
+data<-student |> 
   drop_na(education) |> 
   mutate(education = fct_infreq(education)) |> 
   group_by(education) |> 
   summarise(n = n()) |> 
-  mutate(perc = n/sum(n)*100) |> 
-  ggplot(aes(x = n,
-             y = fct_rev(education),
-             fill = education)) +
-  geom_col(width = 0.5) +
-  gghighlight(max(n),
-              max_highlight = 2L) +
-  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
-            hjust = 1.1,
-            fontface = "bold",
-            color = "black"
+  mutate(perc = n/sum(n)*100)
+# Set a number of 'empty bar'
+empty_bar <- 3
+ 
+# Add lines to the initial dataset
+to_add <- matrix(NA, empty_bar, ncol(data))
+colnames(to_add) <- colnames(data)
+data <- rbind(data, to_add)
+data$id <- seq(1, nrow(data))
+# Get the name and the y position of each label
+label_data <- data
+number_of_bar <- nrow(label_data)
+angle <- 90 - 360 * (label_data$id-0.5) /number_of_bar     # I substract 0.5 because the letter must have the angle of the center of the bars. Not extreme right(1) or extreme left (0)
+label_data$hjust <- ifelse( angle < -90, 1, 0)
+label_data$angle <- ifelse(angle < -90, angle+180, angle)
+
+# Make the plot
+ggplot(data, aes(x=as.factor(id), y=perc,fill=education)) +       # Note that id is a factor. If x is numeric, there is some space between the first bar
+  geom_bar(stat="identity") +
+  ylim(-100,120) +
+  theme_minimal() +
+  theme(
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    panel.grid = element_blank(),
+    plot.margin = unit(rep(-1,4), "cm") 
   ) +
-  theme_minimal(base_size = 12) +
+  coord_polar(start = 0) + 
+  geom_text(data=label_data, aes(x=id, y=perc+10, label=sprintf("%s \n %s (%s%%)", education,n, round(perc,0)), 
+                                 hjust=hjust), 
+            color="black", #fontface="bold",
+             size=3.5,
+            angle= label_data$angle, inherit.aes = FALSE ) +
+  theme_void() +
   theme(legend.position = "none") +
   labs(
-    x = "Count",
-    y = "Level of Education",
+    x = "",
+    y = "",
     caption = "The total number of student is 877"
   )
+ 
 ```
 
 ## Place
 
 ```{r state-plot}
-student |> 
+data<-student |> 
   drop_na(state) |> 
   mutate(state= fct_infreq(fct_lump_n(state, n=3))) |> 
   group_by(state) |> 
   summarise(n = n()) |> 
-  mutate(perc = n/sum(n)*100) |> 
-  ggplot(aes(x = n,
-             y = fct_rev(state),
-             fill = state)) +
-  geom_col(width = 0.5) +
-  gghighlight(max(n),
-              max_highlight = 2L) +
-  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
-            hjust = 1.1,
-            fontface = "bold",
-            color = "black"
-  ) +
-  theme_minimal(base_size = 12) +
+  mutate(perc = n/sum(n)*100)
+
+
+# Set a number of 'empty bar'
+empty_bar <- 3
+ 
+# Add lines to the initial dataset
+to_add <- matrix(NA, empty_bar, ncol(data))
+colnames(to_add) <- colnames(data)
+data <- rbind(data, to_add)
+data$id <- seq(1, nrow(data))
+# Get the name and the y position of each label
+label_data <- data
+number_of_bar <- nrow(label_data)
+angle <- 90 - 360 * (label_data$id-0.5) /number_of_bar     # I substract 0.5 because the letter must have the angle of the center of the bars. Not extreme right(1) or extreme left (0)
+label_data$hjust <- ifelse( angle < -90, 1, 0)
+label_data$angle <- ifelse(angle < -90, angle+180, angle)
+
+# Make the plot
+ggplot(data, aes(x=as.factor(id), y=perc,fill=state)) +       # Note that id is a factor. If x is numeric, there is some space between the first bar
+  geom_bar(stat="identity") +
+  ylim(-100,120) +
+  theme_minimal() +
+  
+  coord_polar(start = 0) + 
+  geom_text(data=label_data, aes(x=id, y=perc+10, 
+                                 label=sprintf("%s \n %s (%s%%)", state,n, round(perc,0)), 
+                                 hjust=hjust), 
+            color="black", #fontface="bold",
+            size=3.5, 
+            angle= label_data$angle, inherit.aes = FALSE ) +
+  theme_void() +
   theme(legend.position = "none") +
   labs(
-    x = "Count",
-    y = "State of India",
+    x = "",
+    y = "",
     caption = "The total number of student is 877"
   )
+
+
 ```
 
 ## Fathers' Education
 
 ```{r father-edu-plot}
-student |> 
+data<-student |> 
   drop_na(father_edu) |> 
   mutate(father_edu = fct_infreq(father_edu)) |> 
   group_by(father_edu) |> 
   summarise(n = n()) |> 
-  mutate(perc = n/sum(n)*100) |> 
-  ggplot(aes(x = n,
-             y = fct_rev(father_edu),
-             fill = father_edu)) +
-  geom_col(width = 0.5) +
-  gghighlight(max(n),
-              max_highlight = 3L) +
-  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
-            hjust = 1.1,
-            fontface = "bold",
-            color = "black"
-  ) +
-  theme_minimal(base_size = 12) +
+  mutate(perc = n/sum(n)*100)
+
+
+# Set a number of 'empty bar'
+empty_bar <- 2
+ 
+# Add lines to the initial dataset
+to_add <- matrix(NA, empty_bar, ncol(data))
+colnames(to_add) <- colnames(data)
+data <- rbind(data, to_add)
+data$id <- seq(1, nrow(data))
+# Get the name and the y position of each label
+label_data <- data
+number_of_bar <- nrow(label_data)
+angle <- 90 - 360 * (label_data$id-0.5) /number_of_bar     # I substract 0.5 because the letter must have the angle of the center of the bars. Not extreme right(1) or extreme left (0)
+label_data$hjust <- ifelse( angle < -90, 1, 0)
+label_data$angle <- ifelse(angle < -90, angle+180, angle)
+
+# Make the plot
+ggplot(data, aes(x=as.factor(id), y=perc,fill=father_edu)) +       # Note that id is a factor. If x is numeric, there is some space between the first bar
+  geom_bar(stat="identity") +
+  ylim(-100,120) +
+  theme_minimal() +
+  
+  coord_polar(start = 0) + 
+  geom_text(data=label_data, aes(x=id, y=perc+10, 
+                                 label=sprintf("%s \n %s (%s%%)", father_edu,n, round(perc,0)), 
+                                 hjust=hjust), 
+            color="black", #fontface="bold",
+            size=3.5, 
+            angle= label_data$angle, inherit.aes = FALSE ) +
+  theme_void() +
   theme(legend.position = "none") +
   labs(
-    x = "Count",
-    y = "Level of Education",
+    x = "",
+    y = "",
     caption = "The total number of student is 877"
   )
+
+
+
 ```
 
 ## Mothers' Education
 
 ```{r mother-edu-plot}
-student |> 
+data<-student |> 
   drop_na(mother_edu) |> 
   mutate(mother_edu = fct_infreq(mother_edu)) |> 
   group_by(mother_edu) |> 
   summarise(n = n()) |> 
-  mutate(perc = n/sum(n)*100) |> 
-  ggplot(aes(x = n,
-             y = fct_rev(mother_edu),
-             fill = mother_edu)) +
-  geom_col(width = 0.5) +
-  gghighlight(max(n),
-              max_highlight = 2L) +
-  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
-            hjust = 1.1,
-            fontface = "bold",
-            color = "black"
-  ) +
-  theme_minimal(base_size = 12) +
+  mutate(perc = n/sum(n)*100)
+
+# Set a number of 'empty bar'
+empty_bar <- 2
+ 
+# Add lines to the initial dataset
+to_add <- matrix(NA, empty_bar, ncol(data))
+colnames(to_add) <- colnames(data)
+data <- rbind(data, to_add)
+data$id <- seq(1, nrow(data))
+# Get the name and the y position of each label
+label_data <- data
+number_of_bar <- nrow(label_data)
+angle <- 90 - 360 * (label_data$id-0.5) /number_of_bar     # I substract 0.5 because the letter must have the angle of the center of the bars. Not extreme right(1) or extreme left (0)
+label_data$hjust <- ifelse( angle < -90, 1, 0)
+label_data$angle <- ifelse(angle < -90, angle+180, angle)
+
+# Make the plot
+ggplot(data, aes(x=as.factor(id), y=perc,fill=mother_edu)) +       # Note that id is a factor. If x is numeric, there is some space between the first bar
+  geom_bar(stat="identity") +
+  ylim(-100,120) +
+  theme_minimal() +
+  
+  coord_polar(start = 0) + 
+  geom_text(data=label_data, aes(x=id, y=perc+10, 
+                                 label=sprintf("%s \n %s (%s%%)", mother_edu,n, round(perc,0)), 
+                                 hjust=hjust), 
+            color="black", #fontface="bold",
+            size=3.5, 
+            angle= label_data$angle, inherit.aes = FALSE ) +
+  theme_void() +
   theme(legend.position = "none") +
   labs(
-    x = "Count",
-    y = "Level of Education",
+    x = "",
+    y = "",
     caption = "The total number of student is 877"
   )
+
 ```
 
+<<<<<<< HEAD
 ## Annual Family Income {background="#000000"}
+=======
+## Annual Family Income 
+>>>>>>> faf9b8f04e4491ed508f53c59ff2d0f59a8e4840
 
 ```{r income-plot}
-student |> 
+data<- student |> 
   drop_na(income) |> 
   mutate(income = fct_infreq(income)) |> 
   group_by(income) |> 
   summarise(n = n()) |> 
-  mutate(perc = n/sum(n)*100) |> 
-  ggplot(aes(x = n,
-             y = fct_rev(income),
-             fill = income)) +
-  geom_col(width = 0.5) +
-  scale_y_discrete(labels = function(y) 
-    stringr::str_wrap(y, width = 15)) +
-  gghighlight(max(n),
-              max_highlight = 1L) +
-  geom_text(aes(label = sprintf("%s (%s%%)", n, round(perc,0))),
-            hjust = 1.1,
-            fontface = "bold",
-            color = "black"
-  ) +
-  theme_minimal(base_size = 12) +
+  mutate(perc = n/sum(n)*100)
+
+data['income_old']=data['income']
+data['income']=c("Upto 1lac","between 1 & 2.5lacs",
+                 "between 2.5 & 5lacs","more than 5lacs"	)
+
+# Set a number of 'empty bar'
+empty_bar <- 2
+ 
+# Add lines to the initial dataset
+to_add <- matrix(NA, empty_bar, ncol(data))
+colnames(to_add) <- colnames(data)
+data <- rbind(data, to_add)
+data$id <- seq(1, nrow(data))
+# Get the name and the y position of each label
+label_data <- data
+number_of_bar <- nrow(label_data)
+angle <- 90 - 360 * (label_data$id-0.5) /number_of_bar     # I substract 0.5 because the letter must have the angle of the center of the bars. Not extreme right(1) or extreme left (0)
+label_data$hjust <- ifelse( angle < -90, 1, 0)
+label_data$angle <- ifelse(angle < -90, angle+180, angle)
+
+# Make the plot
+ggplot(data, aes(x=as.factor(id), y=perc,fill=income)) +       # Note that id is a factor. If x is numeric, there is some space between the first bar
+  geom_bar(stat="identity") +
+  ylim(-100,120) +
+  theme_minimal() +
+  
+  coord_polar(start = 0) + 
+  geom_text(data=label_data, aes(x=id, y=perc+10, 
+                                 label=sprintf("%s \n %s (%s%%)", income,n, round(perc,0)), 
+                                 hjust=hjust), 
+            color="black", #fontface="bold",
+            size=3.5, 
+            angle= label_data$angle, inherit.aes = FALSE ) +
+  theme_void() +
   theme(legend.position = "none") +
   labs(
-    x = "Count",
-    y = "Group of Income",
+    x = "",
+    y = "",
     caption = "The total number of student is 877"
   )
+
+
+
+
+
 ```
 
 ## Nalanda Abhiyan Campus
