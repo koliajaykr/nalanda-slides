@@ -32,13 +32,11 @@ library(rvest)
 # install.packages("devtools")
 # devtools::install_github("hadley/emo")
 library(emo)
-
-
 ```
 
 ## Nalanda Academy
 
-Nalanda Academy is an educational institute that trains Bahujan students from rural and poor backgrounds to pursue education in top Indian and foreign university. It works on the Dr. Babasaheb Ambedkar's philosophy to empower our next generation through quality higher education.
+Nalanda Academy is an educational institute that trains marginalized students from rural and poor backgrounds to pursue education in top Indian and foreign university. It works on the Dr. Babasaheb Ambedkar's philosophy to empower our next generation through quality higher education.
 
 ## Nalanda Academy Team
 
